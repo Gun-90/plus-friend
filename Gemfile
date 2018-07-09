@@ -4,7 +4,7 @@ gem 'rest-client'
 gem 'nokogiri'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.5'
-
+gem 'rails_db'
 gem 'sqlite3', :group => :development
 gem 'pg','~>0.21.0' ,:group => :production
 gem 'rails_12factor', :group => :production

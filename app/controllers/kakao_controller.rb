@@ -2,7 +2,7 @@ class KakaoController < ApplicationController
   def keyboard
     @keyboard = {
     type: "buttons",
-    buttons: ["메뉴", "로또", "고양이","강아지"]
+    buttons: ["메뉴", "로또", "고양이", "효진 배그 전적","양재 배그 전적"]
     }
     render json: @keyboard
     
@@ -14,6 +14,7 @@ class KakaoController < ApplicationController
     
     if @user_msg == '메뉴'
       @text = ["김밥", "20층", "돈가스"].sample
+      
     elsif @user_msg == '로또'
       @text = (1..45).to_a.sample(6).sort.to_s
     elsif @user_msg == '고양이'
@@ -21,8 +22,20 @@ class KakaoController < ApplicationController
       @cat_xml = RestClient.get(@url)
       @cat_doc =  Nokogiri::XML(@cat_xml)
       @cat_url = @cat_doc.xpath("//url").text
-      
-      
+    
+    elsif @user_msg == '효진 배그 전적'
+      @bag_url = 'https://pubg.op.gg/user/ZonnaBoTinDa?server=pc-kakao'
+      @bag_html = RestClient.get(@bag_url)
+      @bag_doc =  Nokogiri::HTML(@bag_html)
+      @bag_url = @bag_doc.css('div.recent-matches__avg-rank').text.strip.chomp
+      @text = "최근 20게임 평균"+ @bag_url+ "등\n"+'상세정보 : '+'https://pubg.op.gg/user/ZonnaBoTinDa?server=pc-kakao'
+    
+    elsif @user_msg == '양재 배그 전적'
+      @bag_url = 'https://pubg.op.gg/user/humbazzz?server=pc-kakao'
+      @bag_html = RestClient.get(@bag_url)
+      @bag_doc =  Nokogiri::HTML(@bag_html)
+      @bag_url = @bag_doc.css('div.recent-matches__avg-rank').text.strip.chomp
+      @text = "최근 20게임 평균"+ @bag_url+ "등\n"+'상세정보 : '+'https://pubg.op.gg/user/humbazzz?server=pc-kakao'
     end
     
     @return_msg ={
@@ -40,7 +53,7 @@ class KakaoController < ApplicationController
     }
     @return_keyboard ={
     type: "buttons",
-    buttons: ["메뉴", "로또", "고양이"]
+    buttons: ["메뉴", "로또", "고양이", "효진 배그 전적", "양재 배그 전적" ]
     }
     
     if @user_msg == "고양이"
@@ -48,7 +61,6 @@ class KakaoController < ApplicationController
         message: @return_msg_photo ,
         keyboard: @return_keyboard
       }
-
 
     else
       @result = {
@@ -60,4 +72,24 @@ class KakaoController < ApplicationController
     render json: @result
   end
   
+  
+  
+  
+  def friend_add
+    
+    User.create(chat_room: 0, user_key: params[:user_key])
+    render nothing: true
+  end
+  
+  def friend_delete
+    User.find_by(user_key: params[:user_key]).destroy
+    render nothing: true
+  end
+  
+  def chat_room
+    @user =  User.find_by(user_key: params[:user_key])
+    @user.plus
+    @user.save
+    render nothing: true
+  end
 end
